@@ -8,16 +8,21 @@
     },
     "model_config": {
         "py/object": "config.ModelConfig",
-        "creation_date": "20232009",
-        "edit_date": "20232009",
+        "creation_date": "20230920",
+        "edit_date": "20230920",
         "optimizer": "adam",
         "loss": "mse",
         "layers": [
             {
                 "py/object": "config.ModelLayerConfig",
+                "type": "Flatten",
+                "params": {}
+            },
+            {
+                "py/object": "config.ModelLayerConfig",
                 "type": "Dense",
                 "params": {
-                    "units": 32,
+                    "units": 64,
                     "activation": "relu"
                 }
             },
@@ -48,6 +53,6 @@
         "epsilon_min": 0.15,
         "epsilon_decay": 0.995,
         "batch_size": 32,
-        "episodes": 50
+        "episodes": 25
     }
 }

@@ -12,7 +12,7 @@ class Connect4:
     def reset(self) -> np.ndarray:
         self.board = np.zeros((self.height, self.width), dtype=np.int8)
         self.done = False
-        self.turn = 1
+        self.turn = -1
         return self.board
 
     def step(self, action, player) -> Tuple[np.ndarray, float, bool]:
@@ -20,11 +20,13 @@ class Connect4:
             return self.board, 0, True
 
         if action < 0 or action >= self.width:
+            self.done = True
             return self.board, self.rewards.forbidden_move, True
 
         col_data = self.board[:, action]
         if np.all(col_data != 0):
-            return self.board, - self.rewards.win, True
+            self.done = True
+            return self.board, self.rewards.forbidden_move, True
 
         row = np.argmax(col_data == 0)
         self.board[row, action] = player
@@ -46,3 +48,17 @@ class Connect4:
                     if count == 4:
                         return True
         return False
+    
+    def display(self):
+        flip_board = np.flip(self.board, axis=0)
+        rows, cols = flip_board.shape
+        for i in range(rows):
+            for j in range(cols):
+                val = flip_board[i, j]
+                if val == -1:
+                    print("P", end=" | ")
+                elif val == 1:
+                    print("M", end=" | ")
+                else:
+                    print(" ", end=" | ")
+            print("\n" + "-" * (cols * 4))

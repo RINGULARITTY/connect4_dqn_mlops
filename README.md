@@ -10,12 +10,6 @@ Example of basic model version :
 -1 : Newbie player, 1 model
 
 
-To edit precisly the config, edit `config.json` file.
-
-To run tests :
-```
-pytest --spec
-```
-
-To use api to play against the model :
-(in coming)
+- To edit precisly the config, edit `config.json` file.
+- To run tests : `pytest --spec`
+- To use api to play against the model : (in coming)

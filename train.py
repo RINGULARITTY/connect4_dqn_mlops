@@ -1,19 +1,21 @@
 import numpy as np
 import random
+from connect4 import Connect4
+from model import DQN
 
-def train(env, agent, gamma, epsilon, epsilon_decay, batch_size):
+def train(env: Connect4, agent: DQN, gamma, epsilon, epsilon_decay, batch_size, episodes):
     memory = []
 
     from tqdm import tqdm
 
-    for episode in tqdm(range(100)):
+    for _ in tqdm(episodes):
         state = env.reset()
         done = False
         while not done:
             if random.random() < epsilon:
-                action = np.random.choice(num_actions)
+                action = np.random.choice(env.board.shape[1])
             else:
-                q_values = agent.model.predict(state.reshape(1, *state_shape), verbose=0)
+                q_values = agent.model.predict(state.reshape(1, *env.board), verbose=0)
                 action = np.argmax(q_values)
             next_state, reward, done = env.step(action, env.turn)
             memory.append((state, action, reward, next_state, done))

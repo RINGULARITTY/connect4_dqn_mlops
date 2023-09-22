@@ -39,7 +39,7 @@ class TrainConfig:
         self.epsilon_min = 0.15
         self.epsilon_decay = 0.995
         self.batch_size = 32
-        self.episodes = 50
+        self.episodes = 25
 
 class Config:
     def __init__(self):
