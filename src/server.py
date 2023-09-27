@@ -3,6 +3,7 @@ from flask import Flask
 from flask import request
 from flask import make_response
 import tensorflow as tf
+import numpy as np
 
 from config import RewardsConfig
 import jsonpickle
@@ -18,12 +19,22 @@ with open("../config/config.json", 'r') as f:
 
 game = Connect4(rewards_config)
 
+@app.predict("/predict", methods=['POST'])
+def predict():
+    q_values = current_model.predict(game.board.reshape(1, *game.board.shape))
+    action = np.argmax(q_values)
+    try:
+        board,_,_ = game.step(action, -1)
+        return {"board": board}, 200
+    except Exception as e:
+        return {"error": f"Erreur lors du calcul du coup IA : {str(e)}"}, 418
+
 @app.route("/play", methods=['POST']) # Play a round
 def play():
     column = request.json.get('column')
     player = request.json.get('player')
     try:
-        board,_,_ = game.step(column, player)
+        board,_,_ = game.step(column, 1)
         return {"board": board}, 200
     except Exception as e:
         return {"error": f"Erreur lors du calcul du coup : {str(e)}"}, 418
