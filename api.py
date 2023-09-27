@@ -20,7 +20,6 @@ def select_model():
     global current_model
     model_name = request.json.get('model_name')
 
-    # Vérifier si le modèle existe dans le dossier "models"
     model_path = os.path.join('models', model_name)
     if os.path.exists(model_path):
         try:
