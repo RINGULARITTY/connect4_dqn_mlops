@@ -11,5 +11,6 @@ Example of basic model version :
 
 
 - To edit precisly the config, edit `config.json` file.
-- To run tests : `pytest --spec`
+- To run tests : `pytest -x -s --spec test_ci.py`
+- To run client : `streamlit run client.py`
 - To use api to play against the model : (in coming)
