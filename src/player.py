@@ -1,11 +1,9 @@
-from model import DQN, Model
+from model import Model
 from connect4 import Connect4
 from typing import List
 import random
-import tensorflow as tf
 from config import RewardsConfig
 import jsonpickle
-import numpy as np
 
 class Player:
     PLAYERS: List["Player"] = []

@@ -5,8 +5,8 @@ import numpy as np
 import plotly.graph_objects as go
 import pandas as pd
 
-host = "http://localhost"
-port = 5000
+host = "http://51.77.192.29"
+port = 5656
 
 if 'log_step' not in st.session_state:
     st.session_state['log_step'] = 0
