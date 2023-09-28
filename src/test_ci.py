@@ -22,7 +22,7 @@ class Test_01_Config:
         Environment.instance = Environment()
 
     def test_01_config_load(self):
-        with open("./config.json", 'r') as f:
+        with open("../config/config.json", 'r') as f:
             Environment.instance.config = jsonpickle.decode(f.read())
 
     def test_02_config_correct(self):
@@ -187,4 +187,4 @@ class Test_06_Save:
         model: DQN = Environment.instance.model
         
         layers_name = "_".join([l.type for l in config.model_config.layers])
-        model.save_model(f"{datetime.now().strftime('%Y%m%d_%H%M%S')}_{layers_name}", config.model_config)
+        model.save_model(f"{model.input_shape[0]}x{model.input_shape[1]}_{datetime.now().strftime('%Y%m%d_%H%M%S')}_{layers_name}", config)

@@ -1,5 +1,5 @@
 import tensorflow as tf
-from config import ModelConfig, RewardsConfig
+from config import Config, ModelConfig, RewardsConfig
 from model_layers import LAYER_TYPES
 from connect4 import Connect4
 import random
@@ -7,8 +7,20 @@ import numpy as np
 from tqdm import tqdm
 import jsonpickle
 
+class Model:
+    def __init__(self, model_name: str):
+        with open(f"../models/{model_name}/details.json", 'r') as f:
+            config: Config = jsonpickle.decode(f.read())
+        
+        self.input_shape = [config.board_config.height, config.board_config.width]
+        self.model = tf.keras.models.load_model(f"../models/{model_name}")
+    
+    def predict(self, game: Connect4) -> int:
+        return np.argmax(self.model.predict(game.board.reshape(1, *game.board.shape), verbose=0))
+
 class DQN:
-    def __init__(self, input_shape, num_actions, model_config: ModelConfig):
+    def __init__(self, input_shape, num_actions, model_config: ModelConfig, create=True):
+        self.input_shape = input_shape
         self.model: tf.keras.Sequential = self.create_model(input_shape, num_actions, model_config)
         self.target_model: tf.keras.Sequential = self.create_model(input_shape, num_actions, model_config)
         self.update_target_model()
@@ -23,13 +35,10 @@ class DQN:
 
         return model
 
-    def save_model(self, filename, model_config):
-        self.model.save(f"./models/{filename}")
-        with open(f"./models/{filename}/details.json", 'w') as f:
-            f.write(jsonpickle.encode(model_config))
-
-    def load_model(self, path):
-        self.model = tf.keras.models.load_model(path)
+    def save_model(self, filename, config):
+        self.model.save(f"../models/{filename}")
+        with open(f"../models/{filename}/details.json", 'w') as f:
+            f.write(jsonpickle.encode(config))
 
     def update_target_model(self):
         self.target_model.set_weights(self.model.get_weights())

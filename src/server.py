@@ -1,72 +1,95 @@
-import flask
 from flask import Flask
 from flask import request
 from flask import make_response
-import tensorflow as tf
-import numpy as np
 
-from config import RewardsConfig
-import jsonpickle
-from connect4 import Connect4
+from player import Player
 import os
+from monitoring import Monitoring
 
 app = Flask("Connect4")
+m = Monitoring()
 
-global game
 
-with open("../config/config.json", 'r') as f:
-    rewards_config: RewardsConfig = jsonpickle.decode(f.read()).agent_config.rewards_config
-
-game = Connect4(rewards_config)
-
-@app.predict("/predict", methods=['POST'])
-def predict():
-    q_values = current_model.predict(game.board.reshape(1, *game.board.shape))
-    action = np.argmax(q_values)
-    try:
-        board,_,_ = game.step(action, -1)
-        return {"board": board}, 200
-    except Exception as e:
-        return {"error": f"Erreur lors du calcul du coup IA : {str(e)}"}, 418
-
-@app.route("/play", methods=['POST']) # Play a round
-def play():
-    column = request.json.get('column')
-    player = request.json.get('player')
-    try:
-        board,_,_ = game.step(column, 1)
-        return {"board": board}, 200
-    except Exception as e:
-        return {"error": f"Erreur lors du calcul du coup : {str(e)}"}, 418
-
-@app.route('/available_models', methods=['GET']) # Get all available models
-def available_models():
-    all_files = os.listdir('models')
-    model_names = [f for f in all_files if os.path.isdir(os.path.join('models', f))]
-    return {"available_models": model_names}, 200
-
-@app.route('/select_model', methods=['POST']) # Choose one of the available models
-def select_model():
-    global current_model
-    model_name = request.json.get('model_name')
-
-    model_path = os.path.join('models', model_name)
-    if os.path.exists(model_path):
-        try:
-            current_model = tf.keras.models.load_model(model_path)
-            return {"message": f"Modele {model_name} sélectionne avec succes!"}, 200
-        except Exception as e:
-            return {"error": f"Erreur lors du chargement du modele : {str(e)}"}, 500
-    else:
-        return {"error": "Nom de modele invalide ou modèle non trouve"}, 400
-
-@app.route("/connect", methods=['POST']) # Ask for connection
+@app.route("/connect/", methods=['POST'])
 def connect():
-    password = request.json.get('password')
-    if password == "Mlops2024GameAccess":
-        return {"message": "Access granted"}, 200
+    request_json = request.json
+    password = request_json.get('password')
+    if password == "0":
+        m.request_called("connect", True)
+        return {"message": Player.create_player()}, 200
     else:
+        m.request_called("connect", False)
         return {"error": "Access denied: incorrect password"}, 401
+
+@app.route("/get_existing_models/", methods=['POST'])
+def get_existing_models():
+    request_json = request.json
+    player_key = request_json.get('player_key')
+    if not Player.does_exist(player_key):
+        m.request_called("get_existing_models", False)
+        return {"error": "Invalid player key"}
+
+    m.request_called("get_existing_models", True)
+    return {"message" : [os.path.basename(d) for d in os.listdir("../models") if os.path.isdir(os.path.join("../models", d))]}, 200
+
+@app.route("/create_model/", methods=["POST"])
+def create_model():
+    request_json = request.json
+    print(request_json)
+    size = request.json.get('size')
+    #agent = DQN(size, size[1], )
+
+
+@app.route("/pick_model", methods=['POST'])
+def pick_model():
+    request_json = request.json
+    player_key = request_json.get('player_key')
+    model_name = request_json.get('model_name')
+    board = Player.set_model(player_key, model_name)
+    if board == None:
+        m.request_called("pick_model", False)
+        return {"error": "Invalid player key"}, 401
+    m.picked_model(model_name)
+    m.request_called("pick_model", True)
+    return {"message": board}, 200
+
+@app.route("/play_model", methods=['POST'])
+def play_model():
+    request_json = request.json
+    player_key = request_json.get('player_key')
+    res = Player.play_model(player_key)
+    if res == None:
+        m.request_called("play_model", False)
+        return {"error": "Invalid player key"}, 401
+    m.request_called("play_model", True)
+    return {"message": res}, 200
+
+@app.route("/play_player", methods=['POST'])
+def play_player():
+    request_json = request.json
+    player_key = request_json.get('player_key')
+    action = request_json.get('action')
+    res = Player.play_player(player_key, action)
+    if res == None:
+        m.request_called("play_player", False)
+        return {"error": "Invalid player key"}, 401
+    m.request_called("play_player", True)
+    return {"message": res}, 200
+
+@app.route("/get_server_info", methods=['POST'])
+def get_server_info():
+    request_json = request.json
+    admin_password = request_json.get('admin_password')
+    if not admin_password == "admin":
+        m.request_called("get_server_info", False)
+        return {"error": "Invalid admin password"}, 401
+    m.request_called("get_server_info", True)
+    return {
+        "players_amount": len(Player.PLAYERS),
+        "picked_models": m.get_picked_models(),
+        "requests_amount": m.get_total_requests_info(),
+        "requests_timeline": m.get_timeline_date()
+    }, 200
 
 if __name__ == "__main__":
     app.run(debug=True)
