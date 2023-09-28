@@ -1,6 +1,7 @@
 from flask import Flask
 from flask import request
 from flask import make_response
+from flasgger import Swagger
 
 from player import Player
 import os
@@ -9,9 +10,32 @@ from monitoring import Monitoring
 app = Flask("Connect4")
 m = Monitoring()
 
+Swagger(app)
 
 @app.route("/connect/", methods=['POST'])
 def connect():
+    """
+    connect
+    ---
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          id: player_password
+          required:
+            - name
+            - description
+          properties:
+            password:
+              type: string
+
+    responses:
+      200:
+        description: Return player key
+      401:
+        description: Access denied
+    """
     request_json = request.json
     password = request_json.get('password')
     if password == "0":
@@ -23,6 +47,28 @@ def connect():
 
 @app.route("/get_existing_models/", methods=['POST'])
 def get_existing_models():
+    """
+    get_existing_models
+    ---
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          id: player_key
+          required:
+            - name
+            - description
+          properties:
+            player_key:
+              type: string
+    
+    responses:
+      200:
+        description: Return list of models
+      401:
+        description: Access denied
+    """
     request_json = request.json
     player_key = request_json.get('player_key')
     if not Player.does_exist(player_key):
@@ -42,6 +88,29 @@ def create_model():
 
 @app.route("/pick_model", methods=['POST'])
 def pick_model():
+    """
+    pick_model
+    ---
+    parameters:
+      - name: body
+        in: body
+        required: true
+        schema:
+          id: pick_model
+          required:
+            - name
+            - description
+          properties:
+            player_key:
+              type: string
+            model_name:
+              type: string
+    responses:
+      200:
+        description: Return board
+      401:
+        description: Access denied
+    """
     request_json = request.json
     player_key = request_json.get('player_key')
     model_name = request_json.get('model_name')
@@ -55,6 +124,15 @@ def pick_model():
 
 @app.route("/play_model", methods=['POST'])
 def play_model():
+    """
+    play_model
+    ---
+    responses:
+      200:
+        description: Return board
+      401:
+        description: Access denied
+    """
     request_json = request.json
     player_key = request_json.get('player_key')
     res = Player.play_model(player_key)
@@ -66,6 +144,15 @@ def play_model():
 
 @app.route("/play_player", methods=['POST'])
 def play_player():
+    """
+    play_player
+    ---
+    responses:
+      200:
+        description: Return board
+      401:
+        description: Access denied
+    """
     request_json = request.json
     player_key = request_json.get('player_key')
     action = request_json.get('action')
@@ -78,6 +165,15 @@ def play_player():
 
 @app.route("/get_server_info", methods=['POST'])
 def get_server_info():
+    """
+    get_server_info
+    ---
+    responses:
+      200:
+        description: Return dict of data
+      401:
+        description: Access denied
+    """
     request_json = request.json
     admin_password = request_json.get('admin_password')
     if not admin_password == "admin":

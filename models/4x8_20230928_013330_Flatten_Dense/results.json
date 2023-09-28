@@ -1,0 +1,12 @@
+{
+    "25": {
+        "average_rounds": 11.45,
+        "average_rewards": -17.87,
+        "average_wins": 65.81
+    },
+    "50": {
+        "average_rounds": 8.75,
+        "average_rewards": 2.35,
+        "average_wins": 93.47
+    }
+}

@@ -3,8 +3,8 @@
     "seed": 42,
     "board_config": {
         "py/object": "config.BoardConfig",
-        "width": 8,
-        "height": 4
+        "width": 9,
+        "height": 6
     },
     "model_config": {
         "py/object": "config.ModelConfig",
@@ -45,6 +45,6 @@
         "epsilon_min": 0.15,
         "epsilon_decay": 0.995,
         "batch_size": 32,
-        "episodes": 25
+        "episodes": 50
     }
 }
